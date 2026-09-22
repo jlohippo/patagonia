@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patagonia Web Specials Monitor</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="mb-4">Patagonia Web Specials Monitor</h1>
+
+        <div class="card mb-4">
+            <div class="card-header">
+                Add New Product to Monitor
+            </div>
+            <div class="card-body">
+                <form action="/add" method="POST">
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label for="name" class="form-label">Product Name</label>
+                            <input type="text" class="form-control" id="name" name="name" required>
+                        </div>
+                        <div class="col-md-8 mb-3">
+                            <label for="url" class="form-label">Product URL</label>
+                            <input type="url" class="form-control" id="url" name="url" required>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label for="size" class="form-label">Size (optional)</label>
+                            <input type="text" class="form-control" id="size" name="size">
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="color" class="form-label">Color (optional)</label>
+                            <input type="text" class="form-control" id="color" name="color">
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="target_discount_percent" class="form-label">Target Discount %</label>
+                            <input type="number" class="form-control" id="target_discount_percent" name="target_discount_percent" step="0.1" value="0.0">
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Add Product</button>
+                </form>
+            </div>
+        </div>
+
+        <h2>Monitored Products</h2>
+        <div class="table-responsive">
+            <table class="table table-striped table-hover mt-3">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Name</th>
+                        <th>Size</th>
+                        <th>Color</th>
+                        <th>Target % Off</th>
+                        <th>Status</th>
+                        <th>Current Price</th>
+                        <th>Orig. Price</th>
+                        <th>Last Checked</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for product in products %}
+                    <tr>
+                        <td><a href="{{ product.url }}" target="_blank">{{ product.name }}</a></td>
+                        <td>{{ product.size or 'Any' }}</td>
+                        <td>{{ product.color or 'Any' }}</td>
+                        <td>{{ product.target_discount_percent }}%</td>
+                        <td>
+                            {% if product.is_on_sale %}
+                                <span class="badge bg-success">On Sale!</span>
+                            {% else %}
+                                <span class="badge bg-secondary">Not on sale</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if product.current_price %}
+                                ${{ "%.2f"|format(product.current_price) }}
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if product.original_price %}
+                                ${{ "%.2f"|format(product.original_price) }}
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if product.last_checked %}
+                                {{ product.last_checked.strftime('%Y-%m-%d %H:%M') }}
+                            {% else %}
+                                Never
+                            {% endif %}
+                        </td>
+                        <td>
+                            <form action="/delete/{{ product.id }}" method="POST" style="display:inline;">
+                                <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="9" class="text-center">No products are being monitored.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Bootstrap Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
